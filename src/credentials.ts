@@ -27,35 +27,35 @@ function optionalString(value: unknown): string | null {
 }
 
 /**
- * Honcho credential resolution, highest precedence first:
- *   1. `HONCHO_API_KEY` from the environment (no override channels there).
- *   2. `honcho.json` (`{apiKey, baseUrl?, workspaceId?, peerId?}`) under the harness home.
- * Returns null when neither source yields an apiKey — the plugin then
- * silently disables itself; this function never throws.
+ * Honcho credential resolution: `HONCHO_API_KEY` from the environment overrides
+ * the apiKey, while `baseUrl`/`workspaceId`/`peerId` keep coming from
+ * `honcho.json` (`{apiKey, baseUrl?, workspaceId?, peerId?}` under the harness
+ * home) — a partial env (key only) must not drop the file's workspace. Returns
+ * null when no apiKey resolves anywhere; never throws.
  */
 export function resolveCredentials(options: CredentialsOptions): Credentials | null {
-  const fromEnv = nonEmpty(options.env.HONCHO_API_KEY);
-  if (fromEnv) {
-    return { apiKey: fromEnv, baseUrl: null, workspaceId: null, peerId: null };
-  }
-
+  let fromFile: { apiKey?: string | undefined; baseUrl?: string | undefined; workspaceId?: string | undefined; peerId?: string | undefined } = {};
   try {
     const raw = readFileSync(join(options.dshHome ?? resolveDshHome(), "honcho.json"), "utf8");
     const parsed: unknown = JSON.parse(raw);
     if (parsed !== null && typeof parsed === "object") {
       const record = parsed as Record<string, unknown>;
-      const apiKey = optionalString(record.apiKey);
-      if (apiKey) {
-        return {
-          apiKey,
-          baseUrl: optionalString(record.baseUrl),
-          workspaceId: optionalString(record.workspaceId),
-          peerId: optionalString(record.peerId),
-        };
-      }
+      fromFile = {
+        apiKey: optionalString(record.apiKey) ?? undefined,
+        baseUrl: optionalString(record.baseUrl) ?? undefined,
+        workspaceId: optionalString(record.workspaceId) ?? undefined,
+        peerId: optionalString(record.peerId) ?? undefined,
+      };
     }
   } catch {
-    // Missing home, missing file, or corrupt JSON: the plugin stays disabled.
+    // Missing home, missing file, or corrupt JSON: env may still carry the key.
   }
-  return null;
+  const apiKey = nonEmpty(options.env.HONCHO_API_KEY) ?? fromFile.apiKey ?? null;
+  if (!apiKey) return null;
+  return {
+    apiKey,
+    baseUrl: fromFile.baseUrl ?? null,
+    workspaceId: fromFile.workspaceId ?? null,
+    peerId: fromFile.peerId ?? null,
+  };
 }

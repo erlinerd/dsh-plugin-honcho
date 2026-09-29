@@ -96,8 +96,13 @@ export class MemoryTracker {
     switch (event.type) {
       case "user/message": {
         const buffer = this.openBuffer(sessionId, time);
-        // data IS the UserMessage (dsh contract); tolerate a wrapper.
-        const message = (data.message ?? data) as { content?: unknown } | null;
+        // data IS the UserMessage (dsh contract); tolerate a wrapper. Only the
+        // human prompt (source.kind "user") is captured: synthetic injected
+        // contexts (honcho-recall, runtime-context, skill-catalog, …) arrive
+        // as user-role events too and would otherwise shadow the real prompt.
+        const message = (data.message ?? data) as { content?: unknown; source?: { kind?: unknown } } | null;
+        const kind = message?.source && typeof message.source === "object" ? (message.source as { kind?: unknown }).kind : undefined;
+        if (kind !== undefined && kind !== "user") return;
         const text = textOfContent(message?.content);
         if (this.config.capturePrompts && text !== null && buffer.prompt === null) {
           buffer.prompt = sanitizeText(text, this.config.maxCaptureChars);

@@ -24,7 +24,11 @@ dsh（DeepSeek Harness）原生 cordis 插件：Honcho 记忆回环——session
 | ③ dsh-hook-protocol attach-context | ❌ README 明确 "avoid for bespoke behavior — a native Cordis plugin has the full harness API" |
 | **✅ `agent/created` + `agent.inbox.inject()`** | dsh 原生 per-agent 注入通道（file-change notices / skill content 同类）：durable 落 session log、不 wake driver、source-attributed（`kind: "honcho-recall"`，仿 time-context 自报 kind 惯例）、创建期 await 保证首请求前注入 |
 
-recall 失败/超时 → warn + capture-only 继续（SPEC 允许的降级，未触发——注入点已验证可用）。
+recall 失败/超时 → warn + capture-only 继续（降级路径存在但未触发——**已真实验证**：headless profile 实跑，`agent.inject` 注入 lei peer 的真实上下文（38 条 peerCard，8.6k chars → `maxContextChars` 截断）落入 session log（source kind `honcho-recall`），并随下一请求进入模型上下文）。
+
+capture 侧过滤（真实验证发现）：dsh 的 recall/runtime-context 注入以 **user-role 事件**且排在人写 prompt **之前**落 log——tracker 只认 `source.kind === "user"` 的人写消息，否则注入文本会顶替真实 prompt 被上传。
+
+真实冒烟结论（自建 Honcho，`honcho.honcho.example`）：capture → outbox → 上传 → 远端 messages 落库（`peer_id: lei`，`metadata: {source: "dsh", turnId, memoryKey}`）全部实测通过；验证者只需在长会话/多 turn 场景复验。
 
 ## 配置
 

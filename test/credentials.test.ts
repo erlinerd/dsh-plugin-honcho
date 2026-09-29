@@ -16,8 +16,22 @@ function makeHome(files: Record<string, unknown>): string {
 }
 
 describe("resolveCredentials", () => {
-  it("prefers the HONCHO_API_KEY environment variable over honcho.json", () => {
-    const home = makeHome({ "honcho.json": { apiKey: "file-key", baseUrl: "https://file" } });
+  it("env key overrides only the key; file keeps workspace and peer", () => {
+    const home = makeHome({ "honcho.json": { apiKey: "file-key", baseUrl: "https://file", workspaceId: "ws-1", peerId: "lei" } });
+    try {
+      expect(resolveCredentials({ env: { HONCHO_API_KEY: "env-key" }, dshHome: home })).toEqual({
+        apiKey: "env-key",
+        baseUrl: "https://file",
+        workspaceId: "ws-1",
+        peerId: "lei",
+      });
+    } finally {
+      rmSync(home, { recursive: true, force: true });
+    }
+  });
+
+  it("env-only key (no file) yields no workspace", () => {
+    const home = makeHome({});
     try {
       expect(resolveCredentials({ env: { HONCHO_API_KEY: "env-key" }, dshHome: home })).toEqual({
         apiKey: "env-key",

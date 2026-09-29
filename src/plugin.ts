@@ -33,7 +33,8 @@ export interface WireContext {
     handler: (payload: {
       agent?: {
         session?: { id: unknown };
-        inbox?: { inject(message: unknown): void };
+        /** Runtime facade: inject sits on the agent (dsh-agent-loop ReactLoopAgent). */
+        inject?(message: unknown): void;
       };
     }) => unknown,
   ): void;
@@ -169,7 +170,9 @@ export function wireHoncho(ctx: WireContext, config: HonchoConfig, deps: WireDep
     }),
   );
   ctx.on("session/event", (session, event) =>
-    contain("session/event", () => tracker.ingest(String(session.id), event)),
+    contain("session/event", () => {
+      tracker.ingest(String(session.id), event);
+    }),
   );
   ctx.on("session/disposed", (session) => contain("session/disposed", () => tracker.drop(String(session.id))));
 
@@ -177,8 +180,8 @@ export function wireHoncho(ctx: WireContext, config: HonchoConfig, deps: WireDep
     // Awaited by agent creation: contain everything, never throw, stay inside
     // the budget so a slow Honcho cannot stall the first model call.
     return containAsync("agent recall", async () => {
-      const inbox = payload.agent?.inbox;
-      if (!config.enabled || !config.injectContext || !inbox) return;
+      const agent = payload.agent;
+      if (!config.enabled || !config.injectContext || !agent || !agent.inject) return;
       let recalled: string | null;
       try {
         recalled = await raceBudget(
@@ -192,7 +195,8 @@ export function wireHoncho(ctx: WireContext, config: HonchoConfig, deps: WireDep
       if (!recalled) return;
       const text = sanitizeText(recalled, config.maxContextChars);
       if (!text) return;
-      inbox.inject(
+      // Method call keeps the driver's `this` (inject splices the next-step inbox).
+      agent.inject(
         userMessage(`<honcho-recall>\n${text}\n</honcho-recall>`, {
           kind: "honcho-recall",
           form: "recall",

@@ -161,6 +161,20 @@ describe("MemoryTracker", () => {
     expect(outbox.enqueued).toHaveLength(0);
   });
 
+  it("captures only the human prompt — synthetic injected contexts are skipped", async () => {
+    const { tracker, outbox } = createTracker();
+    // Real log shapes: recall injection lands BEFORE the human prompt.
+    const recall = { content: [{ type: "text", text: "<honcho-recall> Known user context </honcho-recall>" }], source: { kind: "honcho-recall", form: "recall" } };
+    const human = { content: [{ type: "text", text: "the human prompt" }], source: { kind: "user" } };
+    const runtime = { content: [{ type: "text", text: "runtime context snapshot" }], source: { kind: "runtime-context", form: "snapshot" } };
+    tracker.ingest("s1", event(0, "turn/start", { turn: 1 }));
+    tracker.ingest("s1", event(1, "user/message", recall));
+    tracker.ingest("s1", event(2, "user/message", human));
+    tracker.ingest("s1", event(3, "user/message", runtime));
+    tracker.ingest("s1", event(4, "turn/end", { turn: 1, reason: { kind: "completed" } }));
+    expect(outbox.enqueued[0]!.prompt).toBe("the human prompt");
+  });
+
   it("ignores unknown events and malformed data without throwing", () => {
     const { tracker, outbox } = createTracker();
     expect(() => {

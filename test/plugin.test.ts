@@ -151,10 +151,8 @@ describe("wireHoncho", () => {
     const injected: Array<{ content: unknown; source: unknown }> = [];
     const agent = {
       session: { id: "s1" },
-      inbox: {
-        inject: (message: { content: unknown; source: unknown }) => {
-          injected.push(message);
-        },
+      inject: (message: { content: unknown; source: unknown }) => {
+        injected.push(message);
       },
     };
 
@@ -172,7 +170,7 @@ describe("wireHoncho", () => {
     const { ctx } = wire({ config: { maxContextChars: 60 }, client: Object.assign(new ScriptedClient(), { recall: "x".repeat(500) }) });
     const injected: Array<{ content: Array<{ text: string }> }> = [];
     await ctx.emitAsync("agent/created", {
-      agent: { session: { id: "s1" }, inbox: { inject: (m: { content: Array<{ text: string }> }) => injected.push(m) } },
+      agent: { session: { id: "s1" }, inject: (m: { content: Array<{ text: string }> }) => injected.push(m) },
     });
     expect(injected[0]!.content[0]!.text.length).toBeLessThanOrEqual(60 + "<honcho-recall>\n\n</honcho-recall>".length);
     expect(injected[0]!.content[0]!.text).toContain("[truncated]");
@@ -183,7 +181,7 @@ describe("wireHoncho", () => {
     const injected: unknown[] = [];
     await expect(
       ctx.emitAsync("agent/created", {
-        agent: { session: { id: "s1" }, inbox: { inject: (m: unknown) => injected.push(m) } },
+        agent: { session: { id: "s1" }, inject: (m: unknown) => injected.push(m) },
       }),
     ).resolves.toBeUndefined();
     expect(injected).toHaveLength(0);
@@ -262,7 +260,7 @@ describe("wireHoncho", () => {
     await expect(factory()()).resolves.toBeUndefined();
   });
 
-  it("tolerates agent/created payloads without an inbox", async () => {
+  it("tolerates agent/created payloads without an inject facade", async () => {
     const { ctx } = wire();
     await expect(ctx.emitAsync("agent/created", { agent: { session: { id: "s1" } } })).resolves.toBeUndefined();
     expect(ctx.warnings).toHaveLength(0);
