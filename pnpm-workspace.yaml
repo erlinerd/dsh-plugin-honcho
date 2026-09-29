@@ -2,8 +2,7 @@ packages:
   - .
 
 nodeLinker: hoisted
+minimumReleaseAge: 0
 autoInstallPeers: false
-onlyBuiltDependencies:
-  - esbuild
 allowBuilds:
-  esbuild: set this to true or false
+  esbuild: true
