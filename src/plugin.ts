@@ -54,17 +54,24 @@ export interface WireDeps {
 const RETRY_BUDGET_MS = 5_000;
 const RECALL_BUDGET_MS = 3_000;
 
-function userMessage(text: string, source: Record<string, unknown>): unknown {
+/** Structural equivalent of dsh-llm's createUserMessage output (dependency-free). */
+export interface InjectedUserMessage {
+  readonly content: ReadonlyArray<{ readonly type: "text"; readonly text: string }>;
+  readonly source: Record<string, unknown>;
+  readonly role: "user";
+  readonly id: string;
+}
+
+function userMessage(text: string, source: Record<string, unknown>): InjectedUserMessage {
   // Structural equivalent of dsh-llm's createUserMessage (clone + uuid + role),
   // kept dependency-free on purpose.
-  return Object.freeze(
-    structuredClone({
-      content: [{ type: "text", text }],
-      source,
-      role: "user",
-      id: randomUUID(),
-    }),
-  );
+  const message: InjectedUserMessage = {
+    content: [{ type: "text", text }],
+    source,
+    role: "user",
+    id: randomUUID(),
+  };
+  return Object.freeze(structuredClone(message));
 }
 
 function raceBudget<T>(task: Promise<T>, budgetMs: number): Promise<T | null> {
@@ -87,10 +94,10 @@ function raceBudget<T>(task: Promise<T>, budgetMs: number): Promise<T | null> {
  * listener never throws (a throw would fail agent creation).
  *
  * recall injection — investigated per SPEC candidates and resolved to the
- * native per-agent inbox: `agent/created` fires before the first request
+ * native per-agent inject: `agent/created` fires before the first request
  * (AgentLoop holds queued input until its listeners finish, so recall lands
  * before the first model call, matching zcode's SessionStart semantics), and
- * `agent.inbox.inject()` queues durable model-facing context without waking
+ * `agent.inject()` queues durable model-facing context without waking
  * the driver — the same channel dsh itself uses for synthetic contexts.
  * SPEC candidate ① (dsh-system-prompt sections) is per-agent-scoped only
  * through agent.ctx and would leak one session's recall into the global
@@ -252,6 +259,9 @@ export default class HonchoPlugin extends Service {
 
   constructor(ctx: Context, config: HonchoConfig) {
     super(ctx, "honcho");
+    // SAFETY: the harness Context satisfies WireContext structurally — wireHoncho
+    // only binds the handlers declared on WireContext and never uses Context
+    // members beyond them, so the narrowing cannot hide a missing member.
     wireHoncho(ctx as unknown as WireContext, config);
   }
 }
