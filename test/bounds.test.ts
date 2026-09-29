@@ -20,8 +20,8 @@ describe("truncate", () => {
 });
 
 describe("redactSensitiveText", () => {
-  it("redacts bearer tokens", () => {
-    expect(redactSensitiveText("auth: Bearer abc123def")).toBe("auth: [REDACTED]");
+  it("redacts bearer tokens (keeping the scheme)", () => {
+    expect(redactSensitiveText("auth: Bearer abc123def")).toBe("auth: Bearer [REDACTED]");
   });
 
   it("redacts api-key assignments", () => {

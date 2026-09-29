@@ -7,10 +7,6 @@ settings:
 importers:
 
   .:
-    dependencies:
-      '@honcho-ai/sdk':
-        specifier: ^2.4.0
-        version: 2.5.1
     devDependencies:
       '@deepseek-ai/cordis':
         specifier: ~4.0.4
@@ -24,6 +20,9 @@ importers:
       '@deepseek-ai/schemastery':
         specifier: ^3.18.4
         version: 3.18.4
+      '@honcho-ai/sdk':
+        specifier: ^2.5.1
+        version: 2.5.1
       '@types/node':
         specifier: ^22.18.0
         version: 22.20.4
