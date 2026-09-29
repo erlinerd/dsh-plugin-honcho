@@ -20,9 +20,6 @@ importers:
       '@deepseek-ai/schemastery':
         specifier: ^3.18.4
         version: 3.18.4
-      '@honcho-ai/sdk':
-        specifier: ^2.5.1
-        version: 2.5.1
       '@types/node':
         specifier: ^22.18.0
         version: 22.20.4
@@ -211,9 +208,6 @@ packages:
     engines: {node: '>=18'}
     cpu: [x64]
     os: [win32]
-
-  '@honcho-ai/sdk@2.5.1':
-    resolution: {integrity: sha512-CYUy22D4+wnrLMLcuHfhLVhSOvuvv8wBievDfbMkT4B+PMAjuDlPVGdP+3/aWaKd2J+M6ufFD78jyavft9yZXw==}
 
   '@jridgewell/sourcemap-codec@1.6.0':
     resolution: {integrity: sha512-T7jf+5zgsZHwNJ4lvQ7/aezbyk0nNX+zJVWpmHA7VYsEx7a7qr5Rg5IbtJFqkgze5Y2sruq1RUY8Q837Od7iFw==}
@@ -764,9 +758,6 @@ packages:
     engines: {node: '>=8'}
     hasBin: true
 
-  zod@4.0.0:
-    resolution: {integrity: sha512-9diLdTPc/L7w/5jI4C3gHYNiGHDV9IZYxo1e5LSD8cabi65WVTWWb+g2BGPEpUUCOxR4D+6O5B0AzyMdUAXwrw==}
-
 snapshots:
 
   '@deepseek-ai/cordis@4.0.4':
@@ -858,10 +849,6 @@ snapshots:
 
   '@esbuild/win32-x64@0.28.2':
     optional: true
-
-  '@honcho-ai/sdk@2.5.1':
-    dependencies:
-      zod: 4.0.0
 
   '@jridgewell/sourcemap-codec@1.6.0': {}
 
@@ -1310,5 +1297,3 @@ snapshots:
     dependencies:
       siginfo: 2.0.0
       stackback: 0.0.2
-
-  zod@4.0.0: {}
