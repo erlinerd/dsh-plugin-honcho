@@ -109,17 +109,25 @@ describe("withFileLock", () => {
 
   it("times out fast when another holder never releases (injectable budget)", async () => {
     const lockPath = join(rootDir, "stuck.lock");
+    let releaseAcquired: () => void = () => {};
+    const acquired = new Promise<void>((resolve) => {
+      releaseAcquired = resolve;
+    });
     const blocker = withFileLock(
       lockPath,
-      () => new Promise(() => {}),
+      async () => {
+        releaseAcquired(); // task runs only after the lock is held
+        await new Promise(() => {});
+      },
       { attempts: 2, waitMs: 5 },
     );
+    await acquired;
     await expect(
       withFileLock(lockPath, async () => 1, { attempts: 2, waitMs: 5 }),
     ).rejects.toThrow(/lock/i);
     await rmSync(lockPath, { force: true });
     void blocker;
-  });
+  }, 10_000);
 
   it("steals a stale lock older than the staleness budget", async () => {
     const lockPath = join(rootDir, "stale.lock");
