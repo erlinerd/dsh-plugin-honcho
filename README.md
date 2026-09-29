@@ -62,4 +62,6 @@ pnpm install
 pnpm check   # lint + typecheck + test + build（含 pack dry-run 门禁）
 ```
 
+类型依赖 `@deepseek-ai/dsh-session` / `@deepseek-ai/dsh-home-paths` 已发布到 npm（0.2.0-rc.2），`pnpm install` 即可。
+
 真实 Honcho 落库冒烟由验证者执行，不在本仓库门禁内。

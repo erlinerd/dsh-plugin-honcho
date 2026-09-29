@@ -19,8 +19,6 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm lint
+      - run: pnpm typecheck
       - run: pnpm test
-      # typecheck/build additionally need local @deepseek-ai/dsh-session and
-      # dsh-home-paths types (not on npm yet); run `pnpm typecheck && pnpm
-      # build` in an environment with a DeepSeek Harness install
-      # (`node scripts/dev-setup.mjs`).
+      - run: pnpm build
