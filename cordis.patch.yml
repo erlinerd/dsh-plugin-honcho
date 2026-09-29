@@ -1,0 +1,7 @@
+# dsh-plugin-honcho bundle patch: mounts the plugin into the base-backed
+# profile. The row's `name` resolves this package's default export
+# (lib/index.js); credentials come from the environment or $DSH_HOME/honcho.json.
+- insert:
+    - id: honcho
+      name: dsh-plugin-honcho
+      config: {}
