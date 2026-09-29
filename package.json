@@ -35,8 +35,6 @@
   },
   "devDependencies": {
     "@deepseek-ai/cordis": "~4.0.4",
-    "@deepseek-ai/dsh-home-paths": "link:><DSH_INSTALL>/22.22.2/lib/node_modules/@deepseek-ai/dsh/node_modules/@deepseek-ai/dsh-home-paths",
-    "@deepseek-ai/dsh-session": "link:><DSH_INSTALL>/22.22.2/lib/node_modules/@deepseek-ai/dsh/node_modules/@deepseek-ai/dsh-session",
     "@deepseek-ai/schemastery": "^3.18.4",
     "@types/node": "^22.18.0",
     "oxlint": "^1.82.0",

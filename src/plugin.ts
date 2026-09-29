@@ -107,7 +107,7 @@ function raceBudget<T>(task: Promise<T>, budgetMs: number): Promise<T | null> {
  * the full harness API". Capture-only fallback applies if recall fails.
  */
 export function wireHoncho(ctx: WireContext, config: HonchoConfig, deps: WireDeps = {}): void {
-  const credentials = deps.credentials !== undefined ? deps.credentials : resolveCredentials({ env: process.env });
+  const credentials = deps.credentials === undefined ? resolveCredentials({ env: process.env }) : deps.credentials;
   if (!credentials) {
     if (config.debug) {
       ctx.logger.warn("honcho: no credentials found (HONCHO_API_KEY env or $DSH_HOME/honcho.json); plugin disabled");

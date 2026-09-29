@@ -28,7 +28,7 @@ recall 失败/超时 → warn + capture-only 继续（降级路径存在但未�
 
 capture 侧过滤（真实验证发现）：dsh 的 recall/runtime-context 注入以 **user-role 事件**且排在人写 prompt **之前**落 log——tracker 只认 `source.kind === "user"` 的人写消息，否则注入文本会顶替真实 prompt 被上传。
 
-真实冒烟结论（自建 Honcho，`honcho.honcho.example`）：capture → outbox → 上传 → 远端 messages 落库（`peer_id: lei`，`metadata: {source: "dsh", turnId, memoryKey}`）全部实测通过；验证者只需在长会话/多 turn 场景复验。
+真实冒烟结论（自建 Honcho 实例）：capture → outbox → 上传 → 远端 messages 落库（用户 peer，`metadata: {source: "dsh", turnId, memoryKey}`）全部实测通过；recall 注入同样实测（peer 上下文以 `honcho-recall` source 落 session log 并进入模型上下文）。
 
 ## 配置
 
