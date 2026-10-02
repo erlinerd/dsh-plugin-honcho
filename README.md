@@ -53,6 +53,12 @@ patch row `config`（schemastery，全部默认值）：`baseUrl`（https://api.
 dsh plugin --profile <profile> add /abs/path/to/dsh-plugin-honcho
 ```
 
+或从 Release 装打包产物（`v*` tag 触发 `.github/workflows/release.yml`，产出 `.tgz` + `.sha256`）：
+
+```bash
+dsh plugin --profile <profile> add ./dsh-plugin-honcho-v0.1.0.tgz
+```
+
 安装器契约同 langfuse 插件：`dsh.bundle.patch` 清单 + `files` 白名单（缺失则拒绝挂载/丢 lib），`scripts/build.mjs` 已内置两道校验。
 
 ## 开发
